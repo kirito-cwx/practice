@@ -150,3 +150,5 @@ CACHES = {
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = 'default'
+
+# APPEND_SLASH = False # URL末尾重定向/

@@ -11,5 +11,6 @@ urlpatterns = [
     path(r'qb/', views.get_body),
     path(r'register/', views.UserView.as_view()),
     path(r'books/', views.BookListView.as_view()),
+    re_path(r'books/(\d+)/', views.BookDetailView.as_view()),
     re_path(r'weather/([a-z]+)/(\d{4})/', views.weather),
 ]

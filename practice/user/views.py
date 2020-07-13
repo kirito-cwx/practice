@@ -173,6 +173,60 @@ class BookListView(View):
         return JsonResponse(book_list,safe=False)
 
 
+    def post(self,request):
+        '''
+        新增图书 post /books/  参数json
+        :param request:
+        :return:
+        '''
+        # 获取所有非表单数据，得到bytes
+        data =request.body
+        data_dict = json.loads(data)
+
+        book = BookInfo.objects.create(
+            btitle=data_dict.get('btitle'),
+            bpub_date=data_dict.get('bpub_date')
+        )
+
+        return JsonResponse({
+            'id': book.id,
+            'btitle': book.btitle,
+            'bpub_date': book.bpub_date,
+            'bread': book.bread,
+            'bcomment': book.bcomment,
+            'image': book.image.url if book.image else ''
+        }, status=201)
+
+
+
+class BookDetailView(View):
+
+    def get(self,request,pk):
+        """
+        获取单个图书信息
+        路由： GET  /books/<pk>/
+        """
+        try:
+            book = BookInfo.objects.get(pk=pk)
+        except BookInfo.DoesNotExist:
+            return HttpResponse(status=404)
+        return JsonResponse({
+            'id': book.id,
+            'btitle': book.btitle,
+            'bpub_date': book.bpub_date,
+            'bread': book.bread,
+            'bcomment': book.bcomment,
+            'image': book.image.url if book.image else ''
+        })
+
+    def put(self,request,pk):
+
+        try:
+            book = BookInfo.objects.get(pk=pk)
+        except BookInfo.DoesNotExist:
+            return HttpResponse(status=404)
+
+        return None
 
 
 
