@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+
     # 子应用
     'user.apps.UserConfig'
 ]
@@ -151,4 +153,4 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = 'default'
 
-# APPEND_SLASH = False # URL末尾重定向/
+# APPEND_SLASH = False #确保url一致性,不在重定向'/'

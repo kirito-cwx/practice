@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic.base import View
-from .models import BookInfo,HeroInfo
+from .models import BookInfo, HeroInfo
 
 
 def my_decorator(func):
@@ -41,7 +41,7 @@ def index(request):
         },
         'alist': [1, 2, 3, 4, 5]
     }
-    return render(request,'index.html',context)
+    return render(request, 'index.html', context)
 
 
 def say(request):
@@ -124,7 +124,7 @@ class Base2View(object):
 
 
 # @method_decorator(my_decorator,name='dispatch')
-class UserView(BaseView,Base2View,View):
+class UserView(BaseView, Base2View, View):
 
     # def dispatch(self, request, *args, **kwargs):
     #     return super(UserView, self).dispatch(request, *args, **kwargs)
@@ -145,7 +145,8 @@ class BookListView(View):
     '''
     查询所有图书,增加图书
     '''
-    def get(self,request):
+
+    def get(self, request):
         '''
         查询所有图书
         路由：GET /books/
@@ -156,7 +157,7 @@ class BookListView(View):
         # 创建一个新的列表
         book_list = []
         # 遍历查询集, 获取每一本书, 并且拼接, 存放到list中
-        for book in queryset:     # 惰性查询
+        for book in queryset:  # 惰性查询
             book_list.append({
                 'id': book.id,
                 'btitle': book.btitle,
@@ -170,17 +171,16 @@ class BookListView(View):
         # 默认第一个参数接收dict类型
         # 如果第一个参数不是字典类型
         # 需要把 safe=False, 否则报类型错误
-        return JsonResponse(book_list,safe=False)
+        return JsonResponse(book_list, safe=False)
 
-
-    def post(self,request):
+    def post(self, request):
         '''
         新增图书 post /books/  参数json
         :param request:
         :return:
         '''
         # 获取所有非表单数据，得到bytes
-        data =request.body
+        data = request.body
         data_dict = json.loads(data)
 
         book = BookInfo.objects.create(
@@ -198,14 +198,14 @@ class BookListView(View):
         }, status=201)
 
 
-
 class BookDetailView(View):
 
-    def get(self,request,pk):
+    def get(self, request, pk):
         """
         获取单个图书信息
         路由： GET  /books/<pk>/
         """
+
         try:
             book = BookInfo.objects.get(pk=pk)
         except BookInfo.DoesNotExist:
@@ -219,14 +219,39 @@ class BookDetailView(View):
             'image': book.image.url if book.image else ''
         })
 
-    def put(self,request,pk):
+    def put(self, request, pk):
+
 
         try:
             book = BookInfo.objects.get(pk=pk)
         except BookInfo.DoesNotExist:
             return HttpResponse(status=404)
+        json_bytes = request.body
+        print(type(json_bytes))
+        book_dict = json.loads(json_bytes)
+        # 校验参数
+        book.btitle = book_dict.get('btitle')
+        book.bpub_date = book_dict.get('bpub_date')
+        book.save()
+        return JsonResponse({
+            'id': book.id,
+            'btitle': book.btitle,
+            'bpub_date': book.bpub_date,
+            'bread': book.bread,
+            'bcomment': book.bcomment,
+            'image': book.image.url if book.image else ''
+        })
 
-        return None
+    def delete(self,request,pk):
+        """
+        删除图书
+        路由： DELETE /books/<pk>/
+        """
+        try:
+            book = BookInfo.objects.get(pk=pk)
+        except BookInfo.DoesNotExist:
+            return HttpResponse(status=404)
+        # 如果存在,调用delete()函数,删掉对应的内容
+        book.delete()
 
-
-
+        return HttpResponse(status=204)
