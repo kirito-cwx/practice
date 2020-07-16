@@ -15,6 +15,7 @@ urlpatterns = [
     # path(r'books/', views.BookListView.as_view()),
     # re_path(r'books/(\d+)/', views.BookDetailView.as_view()),
     re_path(r'weather/([a-z]+)/(\d{4})/', views.weather),
+    path('book/',views.BookListView.as_view())
 ]
 
 # 创建一个默认的路由对象

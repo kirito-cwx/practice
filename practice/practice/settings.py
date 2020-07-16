@@ -154,3 +154,13 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = 'default'
 
 # APPEND_SLASH = False #确保url一致性,不在重定向'/'
+
+REST_FRAMEWORK  = {
+    # 默认响应渲染类
+    'DEFAULT_RENDERER_CLASSES':(
+        # json方式渲染
+        'rest_framework.renderers.JSONRenderer',
+        # 浏览器方式渲染
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    )
+}

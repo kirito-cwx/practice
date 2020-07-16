@@ -1,15 +1,19 @@
 import json
-
+from rest_framework import serializers
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound, HttpRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
-
+from rest_framework.generics import GenericAPIView
 # Create your views here.
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic.base import View
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from user.serializers import BookInfoSerializer
 from .models import BookInfo, HeroInfo
 
 
@@ -141,61 +145,61 @@ class UserView(BaseView, Base2View, View):
         return HttpResponse('这里实现注册逻辑')
 
 
-class BookListView(View):
-    '''
-    查询所有图书,增加图书
-    '''
-
-    def get(self, request):
-        '''
-        查询所有图书
-        路由：GET /books/
-        '''
-
-        # 获取所有的图书信息:
-        queryset = BookInfo.objects.all()
-        # 创建一个新的列表
-        book_list = []
-        # 遍历查询集, 获取每一本书, 并且拼接, 存放到list中
-        for book in queryset:  # 惰性查询
-            book_list.append({
-                'id': book.id,
-                'btitle': book.btitle,
-                'bpub_date': book.bpub_date,
-                'bread': book.bread,
-                'bcomment': book.bcomment,
-                'image': book.image.url if book.image else ''
-            })
-        # 返回json类型数据
-        # 这里 JsonResponse(dict, safe=True)
-        # 默认第一个参数接收dict类型
-        # 如果第一个参数不是字典类型
-        # 需要把 safe=False, 否则报类型错误
-        return JsonResponse(book_list, safe=False)
-
-    def post(self, request):
-        '''
-        新增图书 post /books/  参数json
-        :param request:
-        :return:
-        '''
-        # 获取所有非表单数据，得到bytes
-        data = request.body
-        data_dict = json.loads(data)
-
-        book = BookInfo.objects.create(
-            btitle=data_dict.get('btitle'),
-            bpub_date=data_dict.get('bpub_date')
-        )
-
-        return JsonResponse({
-            'id': book.id,
-            'btitle': book.btitle,
-            'bpub_date': book.bpub_date,
-            'bread': book.bread,
-            'bcomment': book.bcomment,
-            'image': book.image.url if book.image else ''
-        }, status=201)
+# class BookListView(View):
+#     '''
+#     查询所有图书,增加图书
+#     '''
+#
+#     def get(self, request):
+#         '''
+#         查询所有图书
+#         路由：GET /books/
+#         '''
+#
+#         # 获取所有的图书信息:
+#         queryset = BookInfo.objects.all()
+#         # 创建一个新的列表
+#         book_list = []
+#         # 遍历查询集, 获取每一本书, 并且拼接, 存放到list中
+#         for book in queryset:  # 惰性查询
+#             book_list.append({
+#                 'id': book.id,
+#                 'btitle': book.btitle,
+#                 'bpub_date': book.bpub_date,
+#                 'bread': book.bread,
+#                 'bcomment': book.bcomment,
+#                 'image': book.image.url if book.image else ''
+#             })
+#         # 返回json类型数据
+#         # 这里 JsonResponse(dict, safe=True)
+#         # 默认第一个参数接收dict类型
+#         # 如果第一个参数不是字典类型
+#         # 需要把 safe=False, 否则报类型错误
+#         return JsonResponse(book_list, safe=False)
+#
+#     def post(self, request):
+#         '''
+#         新增图书 post /books/  参数json
+#         :param request:
+#         :return:
+#         '''
+#         # 获取所有非表单数据，得到bytes
+#         data = request.body
+#         data_dict = json.loads(data)
+#
+#         book = BookInfo.objects.create(
+#             btitle=data_dict.get('btitle'),
+#             bpub_date=data_dict.get('bpub_date')
+#         )
+#
+#         return JsonResponse({
+#             'id': book.id,
+#             'btitle': book.btitle,
+#             'bpub_date': book.bpub_date,
+#             'bread': book.bread,
+#             'bcomment': book.bcomment,
+#             'image': book.image.url if book.image else ''
+#         }, status=201)
 
 
 class BookDetailView(View):
@@ -221,7 +225,6 @@ class BookDetailView(View):
 
     def put(self, request, pk):
 
-
         try:
             book = BookInfo.objects.get(pk=pk)
         except BookInfo.DoesNotExist:
@@ -242,7 +245,7 @@ class BookDetailView(View):
             'image': book.image.url if book.image else ''
         })
 
-    def delete(self,request,pk):
+    def delete(self, request, pk):
         """
         删除图书
         路由： DELETE /books/<pk>/
@@ -255,3 +258,76 @@ class BookDetailView(View):
         book.delete()
 
         return HttpResponse(status=204)
+
+# APIView
+# class BookListView(APIView):
+#
+#     def get(self, request):
+#         # 获取查询集
+#         books = BookInfo.objects.all()
+#         # 调用序列化器,对查询集进行序列化处理
+#         serializer = BookInfoSerializer(books, many=True)
+#         # 处理完成的数据, 再经过 Response 类的处理就会变成 json
+#         print(self.authentication_classes)
+#         print('-----------')
+#         print(self.permission_classes)
+#         print('===========')
+#         print(self.throttle_classes)
+#         return Response(serializer.data)
+#
+#     def post(self,request):
+#         # 反序列化
+#         serializer = BookInfoSerializer(data =request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.validated_data)
+#
+#     def put(self,request):
+#         # data = json.loads( request.body)
+#         # print(data)
+#         print(1)
+#         book = BookInfo.objects.get(pk = request.data.get('id'))
+#         print(book)
+#         serializer = BookInfoSerializer(instance=book,data=request.data)
+#         print(2)
+#         serializer.is_valid(raise_exception=True)
+#         print(3)
+#         book = serializer.save()
+#         print(book)
+#         return Response(serializer.data)
+
+
+# GenericAPIView
+class BookListView(GenericAPIView):
+    # 指明当前视图使用BookInfoSerializer
+    # 这个序列化器类进行数据序列化
+    serializer_class = BookInfoSerializer
+    queryset =  BookInfo.objects.all()
+    # def get(self,request):
+    #     # 获取当前类中定义的序列化器类
+    #     className = self.get_serializer_class()
+    #     serializerObj  = self.get_serializer()
+    #     queryset = self.get_queryset()
+    #     object = self.get_object()
+    #     print(object)
+    #     self.check_object_permissions
+    #     return Response('get func')
+
+    def get(self,request):
+
+        # 查询出所有图书信息
+        obj = self.get_queryset()
+
+        # 返回所有图书信息
+        serializer = self.get_serializer(obj,many=True)
+
+        return Response(serializer.data)
+
+    def post(self,request):
+        """新建一本图书信息"""
+        serializer:serializers.ModelSerializer = self.get_serializer(data = request.data)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
