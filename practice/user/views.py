@@ -1,15 +1,17 @@
 import json
-from rest_framework import serializers
+from rest_framework import serializers, status
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound, HttpRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView,RetrieveAPIView,DestroyAPIView,UpdateAPIView
 # Create your views here.
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic.base import View
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, \
+    DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,55 +19,55 @@ from user.serializers import BookInfoSerializer
 from .models import BookInfo, HeroInfo
 
 
-def my_decorator(func):
-    def wrapper(request, *args, **kwargs):
-        print('自定义装饰器被调用了')
-        print(f'请求路径：{request.path}')
-        return func(request, *args, **kwargs)
-
-    return wrapper
-
-
-def my_decorator2(func):
-    def wrapper(request, *args, **kwargs):
-        print('自定义装饰器被调用了22222')
-        print('请求的路径:%s' % request.path)
-        return func(request, *args, **kwargs)
-
-    return wrapper
+# def my_decorator(func):
+#     def wrapper(request, *args, **kwargs):
+#         print('自定义装饰器被调用了')
+#         print(f'请求路径：{request.path}')
+#         return func(request, *args, **kwargs)
+#
+#     return wrapper
 
 
-def index(request):
-    # template = loader.get_template('index.html')
-    context = {
-        'citys': '北京',
-        'adict': {
-            'name': '西游记',
-            'author': '吴承恩'
-        },
-        'alist': [1, 2, 3, 4, 5]
-    }
-    return render(request, 'index.html', context)
+# def my_decorator2(func):
+#     def wrapper(request, *args, **kwargs):
+#         print('自定义装饰器被调用了22222')
+#         print('请求的路径:%s' % request.path)
+#         return func(request, *args, **kwargs)
+#
+#     return wrapper
 
 
-def say(request):
-    url = reverse('sayname')
-    print(url)
-    return HttpResponse('say')
+# def index(request):
+#     # template = loader.get_template('index.html')
+#     context = {
+#         'citys': '北京',
+#         'adict': {
+#             'name': '西游记',
+#             'author': '吴承恩'
+#         },
+#         'alist': [1, 2, 3, 4, 5]
+#     }
+#     return render(request, 'index.html', context)
 
 
-def weather(request, city, year):
-    print(f'city:{city}')
-    print(f'year:{year}')
-    return HttpResponse('OK')
+# def say(request):
+#     url = reverse('sayname')
+#     print(url)
+#     return HttpResponse('say')
 
 
-def qs(re):
-    a = re.GET.get('a')
-    b = re.GET.get('b')
-    alist = re.GET.getlist('a')
-    # print(a,b,alist)
-    return HttpResponse((a, b, alist))
+# def weather(request, city, year):
+#     print(f'city:{city}')
+#     print(f'year:{year}')
+#     return HttpResponse('OK')
+
+
+# def qs(re):
+#     a = re.GET.get('a')
+#     b = re.GET.get('b')
+#     alist = re.GET.getlist('a')
+#     # print(a,b,alist)
+#     return HttpResponse((a, b, alist))
 
 
 # def get_body(request):
@@ -78,71 +80,71 @@ def qs(re):
 #     return HttpResponse((a, b, alist),404)
 
 
-def get_body(request: HttpRequest):
-    # print(request.method)
-    # print(request.user)
-    # print(request.path)
-    # print(request.encoding)
-    # data = request.body
-    # res = json.loads(data)
-    # print(request.META)
-    # print(res)
-
-    if request.COOKIES.get('demo'):
-        response = HttpResponse('ok')
-    else:
-        response = HttpResponse('false')
-        response['demo'] = 'Python'
-        response.set_cookie('demo1', 'python3', max_age=3600)
-
-    return response
-
-
-def set_session(request: HttpRequest):
-    request.session['one'] = '1'
-    request.session['two'] = '2'
-    return HttpResponse('保存session数据成功')
+# def get_body(request: HttpRequest):
+#     # print(request.method)
+#     # print(request.user)
+#     # print(request.path)
+#     # print(request.encoding)
+#     # data = request.body
+#     # res = json.loads(data)
+#     # print(request.META)
+#     # print(res)
+#
+#     if request.COOKIES.get('demo'):
+#         response = HttpResponse('ok')
+#     else:
+#         response = HttpResponse('false')
+#         response['demo'] = 'Python'
+#         response.set_cookie('demo1', 'python3', max_age=3600)
+#
+#     return response
 
 
-@my_decorator
-def get_session(request):
-    one = request.session.get('one')
-    two = request.session.get('two')
-    return HttpResponse(f'one={one},two={two}')
+# def set_session(request: HttpRequest):
+#     request.session['one'] = '1'
+#     request.session['two'] = '2'
+#     return HttpResponse('保存session数据成功')
 
 
-class BaseView(object):
-    @classmethod
-    def as_view(cls, *args, **kwargs):
-        view = super().as_view(*args, **kwargs)
-        view = my_decorator(view)
-        return view
+# @my_decorator
+# def get_session(request):
+#     one = request.session.get('one')
+#     two = request.session.get('two')
+#     return HttpResponse(f'one={one},two={two}')
 
 
-class Base2View(object):
-    @classmethod
-    def as_view(cls, *args, **kwargs):
-        view = super().as_view(*args, **kwargs)
-        view = my_decorator2(view)
-        return view
+# class BaseView(object):
+#     @classmethod
+#     def as_view(cls, *args, **kwargs):
+#         view = super().as_view(*args, **kwargs)
+#         view = my_decorator(view)
+#         return view
+
+
+# class Base2View(object):
+#     @classmethod
+#     def as_view(cls, *args, **kwargs):
+#         view = super().as_view(*args, **kwargs)
+#         view = my_decorator2(view)
+#         return view
 
 
 # @method_decorator(my_decorator,name='dispatch')
-class UserView(BaseView, Base2View, View):
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     return super(UserView, self).dispatch(request, *args, **kwargs)
-
-    # @method_decorator(my_decorator)
-    def get(self, request):
-        """处理GET请求，返回注册页面"""
-        # print(request.path)
-        return render(request, 'test.html')
-
-    # @method_decorator(my_decorator)
-    def post(self, request):
-        """处理POST请求，实现注册逻辑"""
-        return HttpResponse('这里实现注册逻辑')
+# class UserView(BaseView, Base2View, View):
+#
+#     # def dispatch(self, request, *args, **kwargs):
+#     #     return super(UserView, self).dispatch(request, *args, **kwargs)
+#
+#     # @method_decorator(my_decorator)
+#     def get(self, request):
+#         """处理GET请求，返回注册页面"""
+#         # print(request.path)
+#         return render(request, 'test.html')
+#
+#     # @method_decorator(my_decorator)
+#     def post(self, request):
+#         """处理POST请求，实现注册逻辑"""
+#         return HttpResponse('这里实现注册逻辑')
 
 
 # class BookListView(View):
@@ -162,7 +164,7 @@ class UserView(BaseView, Base2View, View):
 #         book_list = []
 #         # 遍历查询集, 获取每一本书, 并且拼接, 存放到list中
 #         for book in queryset:  # 惰性查询
-#             book_list.append({
+#              .append({
 #                 'id': book.id,
 #                 'btitle': book.btitle,
 #                 'bpub_date': book.bpub_date,
@@ -202,62 +204,63 @@ class UserView(BaseView, Base2View, View):
 #         }, status=201)
 
 
-class BookDetailView(View):
+# class BookDetailView(View):
+#
+#     def get(self, request, pk):
+#         """
+#         获取单个图书信息
+#         路由： GET  /books/<pk>/
+#         """
+#
+#         try:
+#             book = BookInfo.objects.get(pk=pk)
+#         except BookInfo.DoesNotExist:
+#             return HttpResponse(status=404)
+#         return JsonResponse({
+#             'id': book.id,
+#             'btitle': book.btitle,
+#             'bpub_date': book.bpub_date,
+#             'bread': book.bread,
+#             'bcomment': book.bcomment,
+#             'image': book.image.url if book.image else ''
+#         })
+#
+#     def put(self, request, pk):
+#
+#         try:
+#             book = BookInfo.objects.get(pk=pk)
+#         except BookInfo.DoesNotExist:
+#             return HttpResponse(status=404)
+#         json_bytes = request.body
+#         print(type(json_bytes))
+#         book_dict = json.loads(json_bytes)
+#         # 校验参数
+#         book.btitle = book_dict.get('btitle')
+#         book.bpub_date = book_dict.get('bpub_date')
+#         book.save()
+#         return JsonResponse({
+#             'id': book.id,
+#             'btitle': book.btitle,
+#             'bpub_date': book.bpub_date,
+#             'bread': book.bread,
+#             'bcomment': book.bcomment,
+#             'image': book.image.url if book.image else ''
+#         })
+#
+#     def delete(self, request, pk):
+#         """
+#         删除图书
+#         路由： DELETE /books/<pk>/
+#         """
+#         try:
+#             book = BookInfo.objects.get(pk=pk)
+#         except BookInfo.DoesNotExist:
+#             return HttpResponse(status=404)
+#         # 如果存在,调用delete()函数,删掉对应的内容
+#         book.delete()
+#
+#         return HttpResponse(status=204)
 
-    def get(self, request, pk):
-        """
-        获取单个图书信息
-        路由： GET  /books/<pk>/
-        """
-
-        try:
-            book = BookInfo.objects.get(pk=pk)
-        except BookInfo.DoesNotExist:
-            return HttpResponse(status=404)
-        return JsonResponse({
-            'id': book.id,
-            'btitle': book.btitle,
-            'bpub_date': book.bpub_date,
-            'bread': book.bread,
-            'bcomment': book.bcomment,
-            'image': book.image.url if book.image else ''
-        })
-
-    def put(self, request, pk):
-
-        try:
-            book = BookInfo.objects.get(pk=pk)
-        except BookInfo.DoesNotExist:
-            return HttpResponse(status=404)
-        json_bytes = request.body
-        print(type(json_bytes))
-        book_dict = json.loads(json_bytes)
-        # 校验参数
-        book.btitle = book_dict.get('btitle')
-        book.bpub_date = book_dict.get('bpub_date')
-        book.save()
-        return JsonResponse({
-            'id': book.id,
-            'btitle': book.btitle,
-            'bpub_date': book.bpub_date,
-            'bread': book.bread,
-            'bcomment': book.bcomment,
-            'image': book.image.url if book.image else ''
-        })
-
-    def delete(self, request, pk):
-        """
-        删除图书
-        路由： DELETE /books/<pk>/
-        """
-        try:
-            book = BookInfo.objects.get(pk=pk)
-        except BookInfo.DoesNotExist:
-            return HttpResponse(status=404)
-        # 如果存在,调用delete()函数,删掉对应的内容
-        book.delete()
-
-        return HttpResponse(status=204)
 
 # APIView
 # class BookListView(APIView):
@@ -298,36 +301,112 @@ class BookDetailView(View):
 
 
 # GenericAPIView
-class BookListView(GenericAPIView):
-    # 指明当前视图使用BookInfoSerializer
-    # 这个序列化器类进行数据序列化
+# class BookListView(GenericAPIView):
+#     # 指明当前视图使用BookInfoSerializer
+#     # 这个序列化器类进行数据序列化
+#     serializer_class = BookInfoSerializer
+#     queryset = BookInfo.objects.all()
+#
+#     # def get(self,request):
+#     #     # 获取当前类中定义的序列化器类
+#     #     className = self.get_serializer_class()
+#     #     serializerObj  = self.get_serializer()
+#     #     queryset = self.get_queryset()
+#     #     object = self.get_object()
+#     #     print(object)
+#     #     self.check_object_permissions
+#     #     return Response('get func')
+#
+#     def get(self, request):
+#         # 查询出所有图书信息
+#         obj = self.get_queryset()
+#
+#         # 返回所有图书信息
+#         serializer = self.get_serializer(obj, many=True)
+#
+#         return Response(serializer.data)
+#
+#     def post(self, request):
+#         """新建一本图书信息"""
+#         serializer: serializers.ModelSerializer = self.get_serializer(data=request.data)
+#
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# # /books/(?P<pk>\d+)/
+# # /books/10/
+# class BookDetailView(GenericAPIView):
+#     queryset = BookInfo.objects.all()
+#     serializer_class = BookInfoSerializer
+#     lookup_field = 'pk'  # 查询单一数据库对象时使用的条件字段 默认'pk'
+#     lookup_url_kwarg = 'pk'  # 查询单一数据时url中的关键字名称,默认与look_field相同
+#
+#     # url与get参数 与 lookup_url_kwarg 需要相同
+#     def get(self, request, pk):
+#         """获取指定的图书信息"""
+#         # 根据pk查询指定图书信息
+#         obj = self.get_object()
+#         # 返回响应数据
+#         serializer = self.get_serializer(obj)
+#         return Response(serializer.data)
+#
+#     def put(self, request, pk):
+#         """修改指定的图书信息"""
+#         # 根据pk查询指定图书
+#         obj = self.get_object()
+#         # 前端传递参数时，使用json传递
+#         # 获取参数(btitle, bpub_date)并进行参数校验
+#         # 反序列化-数据校验
+#         serializer = self.get_serializer(obj, data=request.data)
+#         serializer.is_valid(raiser_exception=True)
+#         serializer.save()
+#         return Response(serializer.data)
+#
+#     def delete(self, request, pk):
+#         """删除指定的图书信息"""
+#         # 根据pk查询指定图书
+#         obj = self.get_object()
+#
+#         # 删除图书
+#         obj.delete()
+#
+#         # 返回响应数据 status: 204
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Mixin扩展类
+# class BookListView(GenericAPIView,ListModelMixin,CreateModelMixin):
+#
+#     serializer_class = BookInfoSerializer
+#     queryset = BookInfo.objects.all()
+#
+#     def get(self,request):
+#         return self.list(request)
+#
+#     def post(self,request):
+#         return self.create(request)
+#
+# class BookDetailView(GenericAPIView,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin):
+#     serializer_class = BookInfoSerializer
+#     queryset = BookInfo.objects.all()
+#
+#     def get(self,request,pk):
+#         return self.retrieve(request,pk)
+#
+#     def put(self,request,pk):
+#         return self.update(request,pk)
+#
+#     def delete(self,request,pk):
+#         return self.destroy(request,pk)
+
+
+class BookListView(ListAPIView, CreateAPIView):
     serializer_class = BookInfoSerializer
-    queryset =  BookInfo.objects.all()
-    # def get(self,request):
-    #     # 获取当前类中定义的序列化器类
-    #     className = self.get_serializer_class()
-    #     serializerObj  = self.get_serializer()
-    #     queryset = self.get_queryset()
-    #     object = self.get_object()
-    #     print(object)
-    #     self.check_object_permissions
-    #     return Response('get func')
+    queryset = BookInfo.objects.all()
 
-    def get(self,request):
-
-        # 查询出所有图书信息
-        obj = self.get_queryset()
-
-        # 返回所有图书信息
-        serializer = self.get_serializer(obj,many=True)
-
-        return Response(serializer.data)
-
-    def post(self,request):
-        """新建一本图书信息"""
-        serializer:serializers.ModelSerializer = self.get_serializer(data = request.data)
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+class BookDetailView(RetrieveAPIView,UpdateAPIView,DestroyAPIView):
+    serializer_class = BookInfoSerializer
+    queryset = BookInfo.objects.all()
 

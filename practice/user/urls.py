@@ -4,17 +4,17 @@ from .viewset import BookInfoViewSet
 from rest_framework.routers import DefaultRouter
 
 urlpatterns = [
-    path(r'index/', views.index),
-    path(r'say/', views.say),
-    path(r'qs/', views.qs),
-    path(r'qb/', views.get_body),
-    path(r'set_session/', views.set_session),
-    path(r'get_session/', views.get_session),
-    path(r'qb/', views.get_body),
-    path(r'register/', views.UserView.as_view()),
-    # path(r'books/', views.BookListView.as_view()),
-    # re_path(r'books/(\d+)/', views.BookDetailView.as_view()),
-    re_path(r'weather/([a-z]+)/(\d{4})/', views.weather),
+    # path(r'index/', views.index),
+    # path(r'say/', views.say),
+    # path(r'qs/', views.qs),
+    # path(r'qb/', views.get_body),
+    # path(r'set_session/', views.set_session),
+    # path(r'get_session/', views.get_session),
+    # path(r'qb/', views.get_body),
+    # path(r'register/', views.UserView.as_view()),
+    # # path(r'books/', views.BookListView.as_view()),
+    re_path(r'books/(?P<pk>\d{4})/', views.BookDetailView.as_view()),# 必须注明参数
+    # re_path(r'weather/([a-z]+)/(\d{4})/', views.weather),
     path('book/',views.BookListView.as_view())
 ]
 
