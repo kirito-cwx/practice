@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'django_filters', # 过滤器
 
     # 子应用
     'user.apps.UserConfig'
@@ -162,5 +163,38 @@ REST_FRAMEWORK  = {
         'rest_framework.renderers.JSONRenderer',
         # 浏览器方式渲染
         'rest_framework.renderers.BrowsableAPIRenderer'
+    ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES':(
+    #     # 基本认证
+    #     'rest_framework.authentication.BasicAuthentication',
+    #     # session 认证
+    #     'rest_framework.authentication.SessionAuthentication'
+    # ),
+    # # 权限
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
+    # 限流(针对匿名用户和认证用户分别进行限流控制)
+    'DEFAULT_THROTTLE_CLASSES':(
+        # 限制所有匿名未认证用户
+        'rest_framework.throttling.AnonRateThrottle',
+        # 限制认证用户
+        'rest_framework.throttling.UserRateThrottle',
+
+        # 限流(针对匿名用户和认证用户进行统一限流控制)
+        # 'rest_framework.throttling.ScopedRateThrottle'
+    ),
+    # 'DEFAULT_THROTTLE_RATES':{
+    #     # 限制所有匿名未认证用户  100次/天: 每天访问100次
+    #     'anon': '3/minute',
+    #      # 限制认证用户  1000次/天: 每天访问1000次
+    #     'user': '5/minute',
+    #
+    #     # # 这里定义的名字随意写,到时候调用就可以:(见user.viewset)
+    #     # 'contacts': '5/minute',
+    #     # 'upload': '3/minute'
+    # },
+    'DEFAULT_FILTER_BACKENDS':(
+        'django_filters.rest_framework.DjangoFilterBackend',
     )
 }

@@ -35,10 +35,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import django
 
 django.setup()
-
+# from rest_framework.renderers import
 from user.serializers import BookInfoSerializer, HeroInfoSerializer
 from user.models import BookInfo, HeroInfo
 from rest_framework.response import Response
+# from .viewseturls import
 
 if __name__ == '__main__':
     # 查询id为1的图书:
@@ -72,18 +73,19 @@ if __name__ == '__main__':
     # print(book.btitle)  # '倚天剑'
     # books = BookInfo.objects.all()
     # print(books)
-    data = {'btitle': 'about django', 'bread': 10, 'bcomment': 20,"bpub_date":'2020-10-10'}
-    # 传入数据, 进行检测:
-    serializer = BookInfoSerializer(data=data)
-
-    print(serializer.is_valid())
-    print(serializer.errors)
-    print(serializer.validated_data)
-
-    # 进行保存:
-    book = serializer.save()
-    # 查看是否保存成功:
+    # data = {'btitle': 'about django', 'bread': 10, 'bcomment': 20,"bpub_date":'2020-10-10'}
+    # # 传入数据, 进行检测:
+    # serializer = BookInfoSerializer(data=data)
+    #
+    # print(serializer.is_valid())
+    # print(serializer.errors)
+    # print(serializer.validated_data)
+    #
+    # # 进行保存:
+    # book = serializer.save()
+    # # 查看是否保存成功:
+    # print(book)
+    book = BookInfo.objects.last()
     print(book)
-
 
 
