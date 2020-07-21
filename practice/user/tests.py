@@ -85,7 +85,8 @@ if __name__ == '__main__':
     # book = serializer.save()
     # # 查看是否保存成功:
     # print(book)
-    book = BookInfo.objects.last()
+    from django.db.models import Q
+    book = BookInfo.objects.filter(Q(btitle__contains = 'about')|Q(btitle__contains = '斗破苍'))
     print(book)
 
 

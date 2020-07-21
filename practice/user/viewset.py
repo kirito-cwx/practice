@@ -1,6 +1,8 @@
 # coding=utf-8
+from django.db.models import Q
 from django.utils.decorators import method_decorator
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -9,16 +11,109 @@ from .models import BookInfo
 from .serializers import BookInfoSerializer
 from rest_framework.mixins import ListModelMixin, UpdateModelMixin, RetrieveModelMixin
 from rest_framework.decorators import action
+from django_filters import rest_framework as filters
+from django import forms
 
+# class MultiValueCharFilter(filters.CharFilter):
+#     def __init__(self, *args, **kwargs):
+#         kwargs.setdefault('distinct', True)
+#         self.conjoined = kwargs.pop('conjoined', False)
+#         self.null_value = kwargs.get('null_value',  'null')
+#         super().__init__(*args, **kwargs)
+#
+#     def get_filter_predicate(self, v):
+#         name = self.field_name
+#         if name and self.lookup_expr != 'exact':
+#             name = '__'.join([name, self.lookup_expr])
+#         try:
+#             return {name: getattr(v, self.field.to_field_name)}
+#         except (AttributeError, TypeError):
+#             return {name: v}
+#
+#     def filter(self, qs, value):
+#         print(value)
+#         if not value:
+#             # Even though not a noop, no point filtering if empty.
+#             return qs
+#
+#         if not self.conjoined:
+#             q = Q()
+#         for v in value.split(','):
+#             if v == self.null_value:
+#                 v = None
+#             predicate = self.get_filter_predicate(v)
+#             if self.conjoined:
+#                 qs = self.get_method(qs)(**predicate)
+#             else:
+#                 q |= Q(**predicate)
+#
+#         if not self.conjoined:
+#             qs = self.get_method(qs)(q)
+#
+#         return qs.distinct() if self.distinct else qs
+
+
+# TODO  查询字符串中表示多个选择（例如，“？btitle = a,b”）
+# class MultiValueCharFilter(filters.MultipleChoiceFilter):
+#     field_class = forms.CharField
+#     def filter(self, qs, value):
+#         value = value.split(',')
+#         return super().filter(qs,value)
+
+class BookInfoFilterSet(filters.FilterSet):
+    min_bread = filters.NumberFilter(field_name='bread', lookup_expr='gte')
+    max_bread = filters.NumberFilter(field_name='bread', lookup_expr='lte')
+    # btitle= filters.MultipleChoiceFilter(field_name='btitle', lookup_expr='contains',choices=(('abou','about django'),))# 查询字符串中表示多个选择（例如，“？btitle = a$btitle=b”）
+    # btitle= MultiValueCharFilter(field_name='btitle', lookup_expr='contains',)# 查询字符串中表示多个选择（例如，“？btitle = a,b”）
+    btitle= filters.CharFilter(field_name='btitle', lookup_expr='contains')
+    # btitles= filters.CharFilter(method='dry_filter_btitle')
+    # btitle= filters.CharFilter(method='dry_filter_btitle',lookup_expr='contains') # 使用method时lookup_expr无效
+
+    class Meta:
+        model = BookInfo
+        fields = ['btitle','max_bread', 'min_bread']
+
+    def dry_filter_btitle(self,queryset,name,value):
+        a=0
+        print(a)
+        print(queryset)
+        print(name,value)
+        a+=1
+        # print(*args,**kwargs)
+        return BookInfo.objects.filter(**{
+            # f'{name}': value,
+            f'btitle__contains': value,
+        })
+        # return queryset
+
+
+# 自定义分页器类
+class LargeResultsSetPagination(PageNumberPagination):
+    # page_size 每页数目
+    # page_query_param 前端发送的页数关键字名，默认为 "page"
+    # page_size_query_param 前端发送的每页数目关键字名，默认为None
+    # max_page_size 前端最多能设置的每页数量
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
+
+    # LimitOffsetPagination
+    # default_limit 默认限制，默认值与PAGE_SIZE设置一致
+    # limit_query_param limit参数名，默认'limit'
+    # offset_query_param offset参数名，默认'offset'
+    # max_limit 最大limit限制，默认None
 
 class BookInfoViewSet(ModelViewSet):
     # 查询出所有的数据,存放到查询集中(queryset: 查询集)
     queryset = BookInfo.objects.all()
     # 使用序列化器进行序列化:
     serializer_class = BookInfoSerializer
-    lookup_url_kwarg = 'hbook'
-    filter_fields = ('btitle', 'bread')
-
+    # pagination_class = None
+    pagination_class = LargeResultsSetPagination
+    # lookup_url_kwarg = 'hbook'
+    # filter_fields = ('btitle', 'bread')
+    # filterset_fields = ('btitle', 'bread')
+    filterset_class = BookInfoFilterSet  # 不支持将filterset_fields 和 filterset_class一起使用。
     # 给当前视图增加认证: SessionAuthentication--session认证
     # authentication_classes = (SessionAuthentication,)
 
