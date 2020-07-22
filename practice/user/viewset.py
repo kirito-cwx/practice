@@ -13,6 +13,7 @@ from rest_framework.mixins import ListModelMixin, UpdateModelMixin, RetrieveMode
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from django import forms
+from rest_framework.views import exception_handler
 
 # class MultiValueCharFilter(filters.CharFilter):
 #     def __init__(self, *args, **kwargs):
@@ -54,18 +55,18 @@ from django import forms
 
 
 # TODO  查询字符串中表示多个选择（例如，“？btitle = a,b”）
-# class MultiValueCharFilter(filters.MultipleChoiceFilter):
-#     field_class = forms.CharField
-#     def filter(self, qs, value):
-#         value = value.split(',')
-#         return super().filter(qs,value)
+class MultiValueCharFilter(filters.MultipleChoiceFilter):
+    field_class = forms.CharField
+    def filter(self, qs, value):
+        value = value.split(',')
+        return super().filter(qs,value)
 
 class BookInfoFilterSet(filters.FilterSet):
     min_bread = filters.NumberFilter(field_name='bread', lookup_expr='gte')
     max_bread = filters.NumberFilter(field_name='bread', lookup_expr='lte')
     # btitle= filters.MultipleChoiceFilter(field_name='btitle', lookup_expr='contains',choices=(('abou','about django'),))# 查询字符串中表示多个选择（例如，“？btitle = a$btitle=b”）
-    # btitle= MultiValueCharFilter(field_name='btitle', lookup_expr='contains',)# 查询字符串中表示多个选择（例如，“？btitle = a,b”）
-    btitle= filters.CharFilter(field_name='btitle', lookup_expr='contains')
+    btitle= MultiValueCharFilter(field_name='btitle', lookup_expr='contains',)# 查询字符串中表示多个选择（例如，“？btitle = a,b”）
+    # btitle= filters.CharFilter(field_name='btitle', lookup_expr='contains')
     # btitles= filters.CharFilter(method='dry_filter_btitle')
     # btitle= filters.CharFilter(method='dry_filter_btitle',lookup_expr='contains') # 使用method时lookup_expr无效
 

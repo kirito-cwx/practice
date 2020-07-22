@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-
+from rest_framework.documentation import include_docs_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/',include('user.urls')),
-    path('user/',include('user.viewseturls'))
+    path('user/',include('user.viewseturls')),
+    path('docs/',include_docs_urls(title='接口文档')) # title 为接口文档网站的标题。
+    # 1）视图集 ViewSet 中的 retrieve 名称，在接口文档网站中叫做 read
+    # 2）参数的 Description 需要在模型类或序列化器类的字段中以 help_text 选项定义，
 ]

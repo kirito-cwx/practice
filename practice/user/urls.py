@@ -13,9 +13,10 @@ urlpatterns = [
     # path(r'qb/', views.get_body),
     # path(r'register/', views.UserView.as_view()),
     # # path(r'books/', views.BookListView.as_view()),
-    re_path(r'books/(?P<pk>\d{4})/', views.BookDetailView.as_view()),# 必须注明参数
+    # re_path(r'books/(?P<pk>\d{4})/', views.BookDetailView.as_view()),# 必须注明参数
     # re_path(r'weather/([a-z]+)/(\d{4})/', views.weather),
-    path('book/',views.BookListView.as_view())
+    path('book/',views.BookListView.as_view()),
+    path('demo/',views.demoview1.as_view())
 ]
 
 # 创建一个默认的路由对象

@@ -198,5 +198,20 @@ REST_FRAMEWORK  = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2 # 每页数目
+    'PAGE_SIZE': 2, # 每页数目
+    # 默认的异常处理
+    # 'EXCEPTION_HANDLER':'rest_framework.views.exception_handler', # 默认异常处理
+    'EXCEPTION_HANDLER':'user.exception_handler.dry_exception_handler', #自定义异常处理
+    # APIException 所有异常的父类
+    # ParseError 解析错误
+    # AuthenticationFailed 认证失败
+    # NotAuthenticated 尚未认证
+    # PermissionDenied 权限决绝
+    # NotFound 未找到
+    # MethodNotAllowed 请求方式不支持
+    # NotAcceptable 要获取的数据格式不支持
+    # Throttled 超过限流次数
+    # ValidationError 校验失败
+
+'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' #解决自动生成接口文档bug
 }

@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpRequest, JsonRes
 from django.shortcuts import redirect
 from django.template import loader
 from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView,RetrieveAPIView,DestroyAPIView,UpdateAPIView
+from django.db import DatabaseError
 # Create your views here.
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -263,41 +264,45 @@ from .models import BookInfo, HeroInfo
 
 
 # APIView
-# class BookListView(APIView):
-#
-#     def get(self, request):
-#         # 获取查询集
-#         books = BookInfo.objects.all()
-#         # 调用序列化器,对查询集进行序列化处理
-#         serializer = BookInfoSerializer(books, many=True)
-#         # 处理完成的数据, 再经过 Response 类的处理就会变成 json
-#         print(self.authentication_classes)
-#         print('-----------')
-#         print(self.permission_classes)
-#         print('===========')
-#         print(self.throttle_classes)
-#         return Response(serializer.data)
-#
-#     def post(self,request):
-#         # 反序列化
-#         serializer = BookInfoSerializer(data =request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.validated_data)
-#
-#     def put(self,request):
-#         # data = json.loads( request.body)
-#         # print(data)
-#         print(1)
-#         book = BookInfo.objects.get(pk = request.data.get('id'))
-#         print(book)
-#         serializer = BookInfoSerializer(instance=book,data=request.data)
-#         print(2)
-#         serializer.is_valid(raise_exception=True)
-#         print(3)
-#         book = serializer.save()
-#         print(book)
-#         return Response(serializer.data)
+class BookListView(APIView):
+
+    def get(self, request):
+        # 获取查询集
+        books = BookInfo.objects.all()
+        # 调用序列化器,对查询集进行序列化处理
+        serializer = BookInfoSerializer(books, many=True)
+        # 处理完成的数据, 再经过 Response 类的处理就会变成 json
+        print(self.authentication_classes)
+        print('-----------')
+        print(self.permission_classes)
+        print('===========')
+        print(self.throttle_classes)
+        return Response(serializer.data)
+
+    def post(self,request):
+        # 反序列化
+        print(request.data)
+        option = request.data.pop('option',None)
+        print(option)
+        print(request.data)
+        serializer = BookInfoSerializer(data =request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.validated_data)
+
+    def put(self,request):
+        # data = json.loads( request.body)
+        # print(data)
+        print(1)
+        book = BookInfo.objects.get(pk = request.data.get('id'))
+        print(book)
+        serializer = BookInfoSerializer(instance=book,data=request.data)
+        print(2)
+        serializer.is_valid(raise_exception=True)
+        print(3)
+        book = serializer.save()
+        print(book)
+        return Response(serializer.data)
 
 
 # GenericAPIView
@@ -402,11 +407,20 @@ from .models import BookInfo, HeroInfo
 #         return self.destroy(request,pk)
 
 
-class BookListView(ListAPIView, CreateAPIView):
-    serializer_class = BookInfoSerializer
-    queryset = BookInfo.objects.all()
+# class BookListView(ListAPIView, CreateAPIView):
+#     serializer_class = BookInfoSerializer
+#     queryset = BookInfo.objects.all()
+#
+# class BookDetailView(RetrieveAPIView,UpdateAPIView,DestroyAPIView):
+#     serializer_class = BookInfoSerializer
+#     queryset = BookInfo.objects.all()
 
-class BookDetailView(RetrieveAPIView,UpdateAPIView,DestroyAPIView):
-    serializer_class = BookInfoSerializer
-    queryset = BookInfo.objects.all()
+
+
+
+# 抛出数据库类异常:
+class demoview1(APIView):
+    def get(self, request):
+        raise DatabaseError
+        return Response('demoview1调用')
 
